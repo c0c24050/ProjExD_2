@@ -6,36 +6,40 @@ import time
 
 
 WIDTH, HEIGHT = 1100, 650
-DELTA = {  #練習1移動量辞書
-    pg.K_UP:    (0, -5),
-    pg.K_DOWN:  (0, +5),
-    pg.K_LEFT:  (-5, 0),
+DELTA = {  # 練習1移動量辞書
+    pg.K_UP: (0, -5),
+    pg.K_DOWN: (0, +5),
+    pg.K_LEFT: (-5, 0),
     pg.K_RIGHT: (+5, 0),
-    pg.K_w:    (0, -5),
-    pg.K_s:  (0, +5),
-    pg.K_a:  (-5, 0),
+    pg.K_w: (0, -5),
+    pg.K_s: (0, +5),
+    pg.K_a: (-5, 0),
     pg.K_d: (+5, 0)
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:#練習3場外定義
+def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:  # 練習3場外定義
+    """オブジェクトが画面内にあるかチェック"""
     x_ok = 0 <= obj_rct.left and obj_rct.right <= WIDTH
     y_ok = 0 <= obj_rct.top and obj_rct.bottom <= HEIGHT
     return x_ok, y_ok
 
 
-def game_over(screen: pg.Surface) -> None:#演習1がめおべら
+def game_over(screen: pg.Surface) -> None:  # 演習1ゲームオーバー
+    """ゲームオーバー画面を表示"""
     blackout = pg.Surface((WIDTH, HEIGHT))
     blackout.set_alpha(150)
     blackout.fill((0, 0, 0))
     screen.blit(blackout, (0, 0))
+
     sad_img = pg.image.load("fig/8.png")
     sad_img = pg.transform.rotozoom(sad_img, 0, 0.9)
     sad_rct1 = sad_img.get_rect(center=(WIDTH//2 + 180, HEIGHT//2))
     sad_rct2 = sad_img.get_rect(center=(WIDTH//2 - 180, HEIGHT//2))
     screen.blit(sad_img, sad_rct1)
     screen.blit(sad_img, sad_rct2)
+
     font = pg.font.SysFont(None, 80)
     text = font.render("Game Over", True, (255, 255, 255))
     text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
@@ -44,10 +48,10 @@ def game_over(screen: pg.Surface) -> None:#演習1がめおべら
     time.sleep(5)
 
 
-def make_bomb_assets():#演習爆弾変化
+def make_bomb_assets():  # 演習爆弾変化
+    """爆弾の画像と加速度のリストを作成"""
     bb_imgs = []
     bb_accs = [a for a in range(1, 11)]
-    print(bb_accs)
     for r in range(1, 11):
         bb_img = pg.Surface((20*r, 20*r))
         bb_img.set_colorkey((0, 0, 0))
@@ -56,7 +60,8 @@ def make_bomb_assets():#演習爆弾変化
     return bb_imgs, bb_accs
 
 
-def load_images():#演習3鳥方向転換
+def load_images():  # 演習3鳥方向転換
+    """こうかとんの方向別画像を読み込み"""
     kk_img0 = pg.image.load("fig/3.png")
     kk_imgs = {}
     directions = {
@@ -80,12 +85,13 @@ def load_images():#演習3鳥方向転換
 
 
 def get_movement_direction(sum_mv: list[int]) -> tuple[int, int]:
+    """移動量から方向を決定"""
     dx = -5 if sum_mv[0] < 0 else 5 if sum_mv[0] > 0 else 0
     dy = -5 if sum_mv[1] < 0 else 5 if sum_mv[1] > 0 else 0
     return (dx, dy)
 
 
-def chase_velocity(bb_rct: pg.Rect, kk_rct: pg.Rect, vx: float, vy: float) -> tuple[float, float]:#演習4追尾爆弾
+def chase_velocity(bb_rct: pg.Rect, kk_rct: pg.Rect, vx: float, vy: float) -> tuple[float, float]:  # 演習4追尾爆弾
     """爆弾がこうかとんを追いかけるように移動方向を決定する"""
     dx = kk_rct.centerx - bb_rct.centerx
     dy = kk_rct.centery - bb_rct.centery
@@ -102,6 +108,7 @@ def chase_velocity(bb_rct: pg.Rect, kk_rct: pg.Rect, vx: float, vy: float) -> tu
 
 
 def main():
+    """メイン関数"""
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")
@@ -112,9 +119,9 @@ def main():
     kk_rct.center = 300, 200
     clock = pg.time.Clock()
     tmr = 0
-    bb_imgs,bb_accs = make_bomb_assets()
+    bb_imgs, bb_accs = make_bomb_assets()
 
-#練習2爆弾定義
+    # 練習2爆弾定義
     bb_img = pg.Surface((20, 20))
     bb_img.set_colorkey((0, 0, 0))
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
@@ -135,7 +142,7 @@ def main():
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
 
-        old_rct = kk_rct.copy()#練習3場外壁
+        old_rct = kk_rct.copy()  # 練習3場外壁
         kk_rct.move_ip(sum_mv)
         x_ok, y_ok = check_bound(kk_rct)
         if not x_ok or not y_ok:
@@ -150,7 +157,7 @@ def main():
         vx, vy = chase_velocity(bb_rct, kk_rct, vx, vy)
         avx, avy = vx * acc, vy * acc
 
-        bb_rct.move_ip(avx, avy)#練習2爆弾移動
+        bb_rct.move_ip(avx, avy)  # 練習2爆弾移動
         if bb_rct.left < 0 or bb_rct.right > WIDTH:
             vx *= -1
         if bb_rct.top < 0 or bb_rct.bottom > HEIGHT:
@@ -162,7 +169,7 @@ def main():
         screen.blit(kk_img, kk_rct)
         screen.blit(bb_img, bb_rct)
 
-        if kk_rct.colliderect(bb_rct):  #練習4衝突判定
+        if kk_rct.colliderect(bb_rct):  # 練習4衝突判定
             game_over(screen)
             return
 
