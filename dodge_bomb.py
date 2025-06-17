@@ -67,10 +67,12 @@ def main():
         screen.blit(kk_img, kk_rct)
         screen.blit(bb_img, bb_rct)
 
+        if kk_rct.colliderect(bb_rct):  #練習4衝突判定
+            return
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
-
 
 
 if __name__ == "__main__":
