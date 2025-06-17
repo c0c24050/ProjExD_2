@@ -40,7 +40,7 @@ def game_over(screen: pg.Surface) -> None:#演習1がめおべら
     time.sleep(5)
 
 
-def make_bomb_assets():#演習2爆弾変化
+def make_bomb_assets():#演習爆弾変化
     bb_imgs = []
     bb_accs = [a for a in range(1, 11)]
     print(bb_accs)
@@ -52,12 +52,45 @@ def make_bomb_assets():#演習2爆弾変化
     return bb_imgs, bb_accs
 
 
+def load_images():
+    kk_img0 = pg.image.load("fig/3.png")  # デフォルト右向き画像
+    kk_imgs = {}
+    directions = {
+        (0, 0): 0,
+        (5, 0): 0,
+        (-5, 0): 0,
+        (0, -5): -90,
+        (0, 5): 90,
+        (5, -5): -45,
+        (-5, -5): -45,
+        (5, 5): 45,
+        (-5, 5): 45
+    }
+
+    for mv, angle in directions.items():
+        img = pg.transform.rotozoom(kk_img0, angle, 0.9)
+        # 左方向のときだけ左右反転
+        if mv[0] > 0:
+            img = pg.transform.flip(img, True, False)
+        kk_imgs[mv] = img
+
+    return kk_imgs
+
+
+def get_movement_direction(sum_mv: list[int]) -> tuple[int, int]:
+    dx = -5 if sum_mv[0] < 0 else 5 if sum_mv[0] > 0 else 0
+    dy = -5 if sum_mv[1] < 0 else 5 if sum_mv[1] > 0 else 0
+    return (dx, dy)
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_imgs = load_images()
+    kk_img = kk_imgs[(0, 0)]
     kk_rct = kk_img.get_rect()
+
     kk_rct.center = 300, 200
     clock = pg.time.Clock()
     tmr = 0
@@ -89,6 +122,9 @@ def main():
         x_ok, y_ok = check_bound(kk_rct)
         if not x_ok or not y_ok:
             kk_rct = old_rct
+
+        mv_dir = get_movement_direction(sum_mv)
+        kk_img = kk_imgs.get(mv_dir, kk_imgs[(0, 0)])
 
         idx = min(tmr // 500, 9)
         bb_img = bb_imgs[idx]
