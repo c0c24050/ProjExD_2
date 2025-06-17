@@ -2,6 +2,7 @@ import os
 import sys
 import pygame as pg
 import random
+import time
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -18,6 +19,25 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:#練習3場外定義
     x_ok = 0 <= obj_rct.left and obj_rct.right <= WIDTH
     y_ok = 0 <= obj_rct.top and obj_rct.bottom <= HEIGHT
     return x_ok, y_ok
+
+
+def game_over(screen: pg.Surface) -> None:#演習1がめおべら
+    blackout = pg.Surface((WIDTH, HEIGHT))
+    blackout.set_alpha(150)
+    blackout.fill((0, 0, 0))
+    screen.blit(blackout, (0, 0))
+    sad_img = pg.image.load("fig/8.png")
+    sad_img = pg.transform.rotozoom(sad_img, 0, 0.9)
+    sad_rct1 = sad_img.get_rect(center=(WIDTH//2 + 180, HEIGHT//2))
+    sad_rct2 = sad_img.get_rect(center=(WIDTH//2 - 180, HEIGHT//2))
+    screen.blit(sad_img, sad_rct1)
+    screen.blit(sad_img, sad_rct2)
+    font = pg.font.SysFont(None, 80)
+    text = font.render("Game Over", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
+    screen.blit(text, text_rect)
+    pg.display.update()
+    time.sleep(5)
 
 
 def main():
@@ -68,6 +88,7 @@ def main():
         screen.blit(bb_img, bb_rct)
 
         if kk_rct.colliderect(bb_rct):  #練習4衝突判定
+            game_over(screen)
             return
 
         pg.display.update()
