@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame as pg
+import random
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -23,6 +24,14 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
 
+#練習2爆弾定義
+    bb_img = pg.Surface((20, 20))
+    bb_img.set_colorkey((0, 0, 0))
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    bb_rct = bb_img.get_rect()
+    bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
+    vx, vy = +5, +5
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -35,9 +44,18 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
-
         kk_rct.move_ip(sum_mv)
+
+        bb_rct.move_ip(vx, vy)#練習2爆弾移動
+        if bb_rct.left < 0 or bb_rct.right > WIDTH:
+            vx *= -1
+        if bb_rct.top < 0 or bb_rct.bottom > HEIGHT:
+            vy *= -1
+
+        screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rct)
+        screen.blit(bb_img, bb_rct)
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
