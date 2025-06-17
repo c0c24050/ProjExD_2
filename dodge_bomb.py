@@ -40,6 +40,18 @@ def game_over(screen: pg.Surface) -> None:#演習1がめおべら
     time.sleep(5)
 
 
+def make_bomb_assets():#演習2爆弾変化
+    bb_imgs = []
+    bb_accs = [a for a in range(1, 11)]
+    print(bb_accs)
+    for r in range(1, 11):
+        bb_img = pg.Surface((20*r, 20*r))
+        bb_img.set_colorkey((0, 0, 0))
+        pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+        bb_imgs.append(bb_img)
+    return bb_imgs, bb_accs
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -49,6 +61,7 @@ def main():
     kk_rct.center = 300, 200
     clock = pg.time.Clock()
     tmr = 0
+    bb_imgs,bb_accs = make_bomb_assets()
 
 #練習2爆弾定義
     bb_img = pg.Surface((20, 20))
@@ -77,11 +90,18 @@ def main():
         if not x_ok or not y_ok:
             kk_rct = old_rct
 
-        bb_rct.move_ip(vx, vy)#練習2爆弾移動
+        idx = min(tmr // 500, 9)
+        bb_img = bb_imgs[idx]
+        acc = bb_accs[idx]
+        avx, avy = vx * acc, vy * acc
+
+        bb_rct.move_ip(avx, avy)#練習2爆弾移動
         if bb_rct.left < 0 or bb_rct.right > WIDTH:
             vx *= -1
         if bb_rct.top < 0 or bb_rct.bottom > HEIGHT:
             vy *= -1
+
+        bb_rct = bb_img.get_rect(center=bb_rct.center)
 
         screen.blit(bg_img, [0, 0])
         screen.blit(kk_img, kk_rct)
