@@ -10,7 +10,11 @@ DELTA = {  #練習1移動量辞書
     pg.K_UP:    (0, -5),
     pg.K_DOWN:  (0, +5),
     pg.K_LEFT:  (-5, 0),
-    pg.K_RIGHT: (+5, 0)
+    pg.K_RIGHT: (+5, 0),
+    pg.K_w:    (0, -5),
+    pg.K_s:  (0, +5),
+    pg.K_a:  (-5, 0),
+    pg.K_d: (+5, 0)
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -52,8 +56,8 @@ def make_bomb_assets():#演習爆弾変化
     return bb_imgs, bb_accs
 
 
-def load_images():
-    kk_img0 = pg.image.load("fig/3.png")  # デフォルト右向き画像
+def load_images():#演習3鳥方向転換
+    kk_img0 = pg.image.load("fig/3.png")
     kk_imgs = {}
     directions = {
         (0, 0): 0,
@@ -66,14 +70,12 @@ def load_images():
         (5, 5): 45,
         (-5, 5): 45
     }
-
     for mv, angle in directions.items():
         img = pg.transform.rotozoom(kk_img0, angle, 0.9)
         # 左方向のときだけ左右反転
         if mv[0] > 0:
             img = pg.transform.flip(img, True, False)
         kk_imgs[mv] = img
-
     return kk_imgs
 
 
@@ -81,6 +83,22 @@ def get_movement_direction(sum_mv: list[int]) -> tuple[int, int]:
     dx = -5 if sum_mv[0] < 0 else 5 if sum_mv[0] > 0 else 0
     dy = -5 if sum_mv[1] < 0 else 5 if sum_mv[1] > 0 else 0
     return (dx, dy)
+
+
+def chase_velocity(bb_rct: pg.Rect, kk_rct: pg.Rect, vx: float, vy: float) -> tuple[float, float]:#演習4追尾爆弾
+    """爆弾がこうかとんを追いかけるように移動方向を決定する"""
+    dx = kk_rct.centerx - bb_rct.centerx
+    dy = kk_rct.centery - bb_rct.centery
+    dist2 = dx**2 + dy**2
+
+    if dist2 < 300**2:
+        return vx, vy
+
+    norm = (dx**2 + dy**2) ** 0.5
+    if norm == 0:
+        return 0, 0
+    scale = (50 ** 0.5) / norm
+    return dx * scale, dy * scale
 
 
 def main():
@@ -129,6 +147,7 @@ def main():
         idx = min(tmr // 500, 9)
         bb_img = bb_imgs[idx]
         acc = bb_accs[idx]
+        vx, vy = chase_velocity(bb_rct, kk_rct, vx, vy)
         avx, avy = vx * acc, vy * acc
 
         bb_rct.move_ip(avx, avy)#練習2爆弾移動
