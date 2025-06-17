@@ -14,6 +14,12 @@ DELTA = {  #練習1移動量辞書
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:#練習3場外定義
+    x_ok = 0 <= obj_rct.left and obj_rct.right <= WIDTH
+    y_ok = 0 <= obj_rct.top and obj_rct.bottom <= HEIGHT
+    return x_ok, y_ok
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -44,7 +50,12 @@ def main():
             if key_lst[key]:
                 sum_mv[0] += delta[0]
                 sum_mv[1] += delta[1]
+
+        old_rct = kk_rct.copy()#練習3場外壁
         kk_rct.move_ip(sum_mv)
+        x_ok, y_ok = check_bound(kk_rct)
+        if not x_ok or not y_ok:
+            kk_rct = old_rct
 
         bb_rct.move_ip(vx, vy)#練習2爆弾移動
         if bb_rct.left < 0 or bb_rct.right > WIDTH:
